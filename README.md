@@ -54,11 +54,8 @@ DeviceProcessEvents
 | where DeviceName == "threat-hunt-lab"
 | where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.5.exe"
 | project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine
-
-<img width="781" alt="image" src="https://github.com/user-attachments/assets/d4054d6c-935e-4286-8ee3-9fe0ee35cf61" />
-
 ```
-
+<img width="781" alt="image" src="https://github.com/user-attachments/assets/d4054d6c-935e-4286-8ee3-9fe0ee35cf61" />
 
 ---
 

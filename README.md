@@ -52,10 +52,12 @@ Searched for any `ProcessCommandLine` that contained the string "tor-browser-win
 ```kql
 DeviceProcessEvents
 | where DeviceName == "threat-hunt-lab"
-| where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.5.exe"
 | project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine
+| where FileName has_any ("tor.exe", "firefox.exe", "tor-browser.exe")
+| order by Timestamp desc
 ```
-<img width="781" alt="image" src="https://github.com/user-attachments/assets/d4054d6c-935e-4286-8ee3-9fe0ee35cf61" />
+<img width="749" alt="image" src="https://github.com/user-attachments/assets/f7299e6c-d492-4fb5-a0f9-02a1010136fa" />
+
 
 ---
 
@@ -83,15 +85,15 @@ Searched for any indication the TOR browser was used to establish a connection u
 **Query used to locate events:**
 
 ```kql
-DeviceNetworkEvents  
-| where DeviceName == "threat-hunt-lab"  
-| where InitiatingProcessAccountName != "system"  
-| where InitiatingProcessFileName in ("tor.exe", "firefox.exe")  
-| where RemotePort in ("9001", "9030", "9040", "9050", "9051", "9150", "80", "443")  
-| project Timestamp, DeviceName, InitiatingProcessAccountName, ActionType, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessFileName, InitiatingProcessFolderPath  
+DeviceNetworkEvents
+| where DeviceName == "threat-hunt-lab"
+| where InitiatingProcessAccountName != "system"
+| where RemotePort in ("9001", "9030", "9040", "9050", "9051", "9150")
+| project Timestamp, DeviceName, InitiatingProcessAccountName, ActionType, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessFileName, InitiatingProcessFolderPath
 | order by Timestamp desc
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/87a02b5b-7d12-4f53-9255-f5e750d0e3cb">
+<img width="779" alt="image" src="https://github.com/user-attachments/assets/6b9e282a-bf28-43a6-84aa-932e453c634e" />
+
 
 ---
 

